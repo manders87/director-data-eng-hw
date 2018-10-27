@@ -3,7 +3,7 @@ import psycopg2
 import sqlalchemy
 import sqlalchemy_redshift
 import datetime
-from sqlalchemy import text
+from sqlalchemy import *
 
 
 def get_matching_s3_objects(bucket, prefix='', suffix=''):
