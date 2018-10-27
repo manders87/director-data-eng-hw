@@ -16,7 +16,7 @@ create_table1= text(
    "subject_id          char(32)       NOT NULL	ENCODE ZSTD,"
   "pair_id             char(32)       NOT NULL	ENCODE ZSTD,"
    "rating_type         decimal(4,2)   NOT NULL	ENCODE RAW,"
-   "rating_activity     varchar (25)				      ENCODE ZSTD,"
+   "rating_activity     varchar (50)				      ENCODE ZSTD,"
    "time_stamp            timestamp    NOT NULL	,"
    "source_file         varchar(50)              ENCODE ZSTD)"
    "DISTSTYLE EVEN SORTKEY(time_stamp, rating_type, pair_id, player_id);"
@@ -44,7 +44,7 @@ create_table3=text("CREATE TABLE IF NOT EXISTS hinge_load.fact_ratings_new_templ
    "subject_id          char(32)       NOT NULL ENCODE ZSTD,"
    "pair_id             char(32)       NOT NULL ENCODE ZSTD DEFAULT '0000000000000000000000000000000000000000',"   ## Not in raw table
    "rating_type         decimal(4,2)   NOT NULL ENCODE ZSTD,"
-   "rating_activity     varchar (25)            ENCODE ZSTD,"             ## Not in raw table
+   "rating_activity     varchar (50)            ENCODE ZSTD,"             ## Not in raw table
    "source_file         varchar(50)             ENCODE ZSTD)"
 	"   DISTKEY(player_id) "
      "  SORTKEY(player_id, time_stamp, rating_type);"
@@ -62,7 +62,7 @@ CREATE TABLE IF NOT EXISTS hinge_load.fact_ratings_derived_template
    subject_id          char(32)       NOT NULL  ENCODE ZSTD,
    pair_id             char(32)       NOT NULL	ENCODE ZSTD,    ## Not in raw table
    rating_type         decimal(4,2)   NOT NULL	ENCODE RAW,
-   rating_activity     varchar (25)		          ENCODE ZSTD,    ## Not in raw table
+   rating_activity     varchar (50)		          ENCODE ZSTD,    ## Not in raw table
    source_file         varchar(50)              ENCODE ZSTD
    DISTKEY(player_id)
    SORTKEY(fact_pending_status, player_id, time_stamp, rating_type)
@@ -78,9 +78,24 @@ create_table5= text(
    "subject_id          char(32)       NOT NULL	ENCODE ZSTD,"
   "pair_id             char(32)       NOT NULL	ENCODE ZSTD,"
    "rating_type         decimal(4,2)   NOT NULL	ENCODE RAW,"
-   "rating_activity     varchar (25)				      ENCODE ZSTD,"
+   "rating_activity     varchar (50)				      ENCODE ZSTD,"
    "time_stamp            timestamp    NOT NULL	,"
    "source_file         varchar(50)              ENCODE ZSTD)"
    "DISTSTYLE EVEN SORTKEY(time_stamp, rating_type, pair_id, player_id);"
    )
 conn.execute(create_table5.execution_options(autocommit=True))
+
+##Pair Id Function
+create_fpairid=text(
+   """
+CREATE FUNCTION f_create_pairid (person1 character varying,person2 character varying)
+RETURNS character varying IMMUTABLE
+AS $$
+	import hashlib
+	if person1>person2:
+		return hashlib.md5(person1+person2).hexdigest()[:32]
+	else:
+		return hashlib.md5(person2+person1).hexdigest()[:32]
+$$ LANGUAGE plpythonu
+""")
+conn.execute(create_fpairid.execution_options(autocommit=True))

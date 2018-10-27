@@ -3,6 +3,7 @@ import boto3
 import psycopg2
 import sqlalchemy
 import sqlalchemy_redshift
+from sqlalchemy import *
 
 
 import_bucket='andershingedemo'
