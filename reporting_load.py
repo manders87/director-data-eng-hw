@@ -128,6 +128,5 @@ from hinge_reporting.fact_ratings_template
 where rating_type<>0
 order by time_stamp desc)
 """)
-# conn.execute(sql.execution_options(autocommit=True))
+conn.execute(sql.execution_options(autocommit=True))
 
-print(rload)
